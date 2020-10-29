@@ -368,8 +368,6 @@ const UpdateProduct = ({match}) => {
                     </div>
                   </div>
                 </div>
-
-
               </div>
               <div className="col-md-6">
                 <div className="form-group">
@@ -388,15 +386,12 @@ const UpdateProduct = ({match}) => {
                       <label className="font-weight-bold">Đã bán</label>
                       <input readOnly type="text" className="form-control" name="sold" value={sold} onChange={handleChange('sold')}/>
                     </div>
-
                   </div>
                 </div>
                 <div className="form-group">
                   <label className="font-weight-bold">Tag</label>
                   <textarea className="form-control" name="tag" onChange={handleChange('tag')} value={tag} ></textarea>
                 </div>
-
-
               </div>
             </div>
           </div>
@@ -408,88 +403,6 @@ const UpdateProduct = ({match}) => {
               formData={formData}
               error={error}
             />
-
-
-            <div className="row">
-              <div className="col-md-4">
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" /><br />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-              </div>
-              <div className="col-md-4">
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 0</button>
-                  </span>
-                  <input id="Picture" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 1</button>
-                  </span>
-                  <input id="Picture1" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 2</button>
-                  </span>
-                  <input id="Picture2" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 3</button>
-                  </span>
-                  <input id="Picture3" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 4</button>
-                  </span>
-                  <input id="Picture4" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 5</button>
-                  </span>
-                  <input id="Picture5" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 6</button>
-                  </span>
-                  <input id="Picture6" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 7</button>
-                  </span>
-                  <input id="Picture7" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 8</button>
-                  </span>
-                  <input id="Picture8" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 9</button>
-                  </span>
-                  <input id="Picture9" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-              </div>
-              <div className="col-md-4">
-
-              </div>
-            </div>
-
           </div>
           <div className="tab-pane" id="tab3" role="tabpanel" aria-labelledby="tab-3">
             <CKEditor data={description} name="description" onChange={ evt => handleChangeCkeditor('description', evt) }

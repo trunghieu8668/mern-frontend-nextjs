@@ -58,7 +58,7 @@ const FileUpload = ({ values, setValues, setLoading, formData, error }) => {
     <>
       {values.pictures && values.pictures.length ? (
         <div className="form-group mt-4">
-          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 d-flex align-items-stretch align-items-center">
+          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 row-cols-lg-6 d-flex align-items-stretch align-items-center">
             {
               values.pictures.map((image)=> (
                  <div className="col" key={image.public_id}>
@@ -69,9 +69,7 @@ const FileUpload = ({ values, setValues, setLoading, formData, error }) => {
           </div>
         </div>
       ) : ''}
-      {
-        JSON.stringify(values.pictures)
-      }
+
       <div className="row">
         <label className="btn btn-primary">
           Choose File

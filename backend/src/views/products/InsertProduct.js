@@ -2,49 +2,37 @@ import React, { Suspense, useState, useEffect, useRef } from 'react'
 import {Redirect} from 'react-router-dom'
 import Layout from '../Layout'
 import { isAuthenticated } from '../../models/auth/api'
-import { Link } from 'react-router-dom'
+import { Link, useHistory } from 'react-router-dom'
 import { createProduct, getCategories, getStatusValues } from '../../models/products/api'
 import NumberFormat from 'react-number-format'
 import {PUBLIC_URL} from '../../config'
 import { addItemPicture, configCkeditor } from '../../helpers'
 import CKEditor from "ckeditor4-react";
+import FileUpload from '../FileUpload'
 
 const InsertProduct = () => {
   const [values, setValues] = useState({
     productName: '',
     productName2: '',
     productSerial: '',
-    description: '',
-    context: '',
-    context1: '',
-    context2: '',
-    context3: '',
-    context4: '',
-    context5: '',
     productPriceNew: 0,
     productPriceVirtual: 0,
     productPriceOld: 0,
     productPriceAgent: 0,
     slug: '',
     photo: '',
-    pictures: '',
     category: '',
-    categories: [],
-    brand: [],
-    productIds: [],
-    productIds2: [],
     quantity: 0,
-    warranty: 12,
+    warranty: 0,
     sold: 0,
-    tag: '',
     visit: 0,
-    vat: true,
     topLevel: 1,
     error: '',
     createdProduct: '',
     redirectToProductsList: false,
     formdata: ''
   })
+  const history = useHistory()
   const {
     productName,
     productName2,
@@ -73,14 +61,17 @@ const InsertProduct = () => {
     tag,
     visit,
     vat,
+    alt,
     topLevel,
     error,
+    status,
+    status2,
     createdProduct,
     redirectToProductsList,
     formData
   } = values
+  const [loading, setLoading] = useState(false);
   const [statusValues, setStatusValues] = useState([])
-  const inputEl = useRef(null);
   const {user, token} = isAuthenticated()
   const init = () => {
     getCategories().then(data => {
@@ -137,8 +128,7 @@ const InsertProduct = () => {
   const showStatus = o => (
     <div className="form-group">
       <label className="font-weight-bold">Trạng thái</label>
-      <select className="custom-select d-block w-100" onChange={handleChange('status2')}>
-        <option>Không chọn</option>
+      <select value={status2} className="custom-select d-block w-100" onChange={handleChange('status2')}>
         {statusValues.map((status, index)=> (
           <option key={index} value={status}> {status} </option>
         ))}
@@ -176,7 +166,6 @@ const InsertProduct = () => {
         ...values,
         [el.name]: el.name === 'photo' ? el.files[0] : el.value, formData: formData.set(el.name, (el.name === 'photo' ? el.files[0] : el.value))
       }), {})
-    console.log(...formData);
     createProduct(user._id, token, formData).then(data => {
       if(data.error) {
         setValues({...values, error: data.error})
@@ -222,6 +211,19 @@ const InsertProduct = () => {
       }
     }).catch(error => console.log(error))
   }
+  const showCategory = () => (
+    <>
+      <label className="font-weight-bold">Nhóm sản phẩm</label>
+      <select value={category} name="category" className="custom-select d-block w-100" onChange={handleChange('category')} required>
+          <option value="0">Không chọn</option>
+          {
+            categories && categories.map((c, i) => {
+              return <option value={c._id} key={i}>{c.name}</option>
+            })
+          }
+      </select>
+    </>
+  )
 
   const shouldRedirect = redirectToProductsList => {
     if(redirectToProductsList) return <Redirect to="/admin/product/productsearch"/>
@@ -258,19 +260,11 @@ const InsertProduct = () => {
             <div className="row">
               <div className="col-md-6">
                 <div className="form-group">
-                    <label className="font-weight-bold">Nhóm sản phẩm</label>
-                    <select name="category" className="custom-select d-block w-100" onChange={handleChange('category')} required>
-                        <option value="0">Không chọn</option>
-                        {
-                          categories && categories.map((c, i) => {
-                            return <option value={c._id} key={i}>{c.name}</option>
-                          })
-                        }
-                    </select>
+                  {showCategory()}
                 </div>
                 <div className="form-group">
                   <label className="font-weight-bold">Tên sản phẩm</label>
-                  <input ref={inputEl} type="text" className="form-control" name="productName" value={productName} onChange={handleChange('productName')} required/>
+                  <input type="text" className="form-control" name="productName" value={productName} onChange={handleChange('productName')} required/>
                 </div>
                 <div className="form-group">
                   <label className="font-weight-bold">Serial</label>
@@ -280,11 +274,11 @@ const InsertProduct = () => {
                 <div className="form-group">
                   <label className="font-weight-bold w-100">Tình trạng</label>
                   <div className="custom-control custom-radio custom-control-inline">
-                    <input defaultChecked onChange={handleChange('status')} type="radio" id="status1" value="on" name="status" className="custom-control-input" />
+                    <input type="radio" id="status1" value={true} checked={status === true ? true : null} name="status" className="custom-control-input" onChange={handleChange('status')} />
                     <label className="custom-control-label" htmlFor="status1">Còn hàng</label>
                   </div>
                   <div className="custom-control custom-radio custom-control-inline">
-                    <input type="radio" onChange={handleChange('status')} id="status2" value="false" name="status" className="custom-control-input" />
+                    <input type="radio"  id="status2" value={false} checked={status === false ? true : null} name="status" className="custom-control-input" onChange={handleChange('status')}/>
                     <label className="custom-control-label" htmlFor="status2">Hết hàng</label>
                   </div>
                 </div>
@@ -292,25 +286,26 @@ const InsertProduct = () => {
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá gốc</label>
-                      <input value={productPriceOld} onChange={handleChange('productPriceOld')} name="productPriceOld" type="text" className="form-control" validator="number" defaultValue={0} />
-                    </div>
+                      <NumberFormat value={productPriceOld} onValueChange={e => {formData.set('productPriceOld', e.floatValue); setValues({...values, productPriceOld: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
+
+                  </div>
                   </div>
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá đại lý</label>
-                      <input value={productPriceAgent} onChange={handleChange('productPriceAgent')} name="productPriceAgent" type="text" className="form-control" validator="number" defaultValue={0} />
-                    </div>
+                      <NumberFormat value={productPriceAgent} onValueChange={e => {formData.set('productPriceAgent', e.floatValue); setValues({...values, productPriceAgent: e.floatValue})}} className="form-control" thousandSeparator={true} isNumericString={true}/>
+                  </div>
                   </div>
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá web</label>
-                      <input value={productPriceNew} onChange={handleChange('productPriceNew')} name="productPriceNew" type="text" className="form-control" validator="number" defaultValue={0} />
+                      <NumberFormat value={productPriceNew} onValueChange={e => {formData.set('productPriceNew', e.floatValue); setValues({...values, productPriceNew: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
                     </div>
                   </div>
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá ảo</label>
-                      <input value={productPriceVirtual} onChange={handleChange('productPriceVirtual')} name="productPriceVirtual" type="text" className="form-control" validator="number" defaultValue={0} />
+                      <NumberFormat value={productPriceVirtual} onValueChange={e => {formData.set('productPriceVirtual', e.floatValue); setValues({...values, productPriceVirtual: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
                     </div>
                   </div>
                 </div>
@@ -318,7 +313,7 @@ const InsertProduct = () => {
                   <div className="col-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">VAT</label>
-                      <input onChange={handleChangeChecked('vat')} type="checkbox" defaultChecked />
+                      <input checked={vat === true ? true : null} onChange={handleChangeChecked('vat')} type="checkbox" />
                       </div>
                   </div>
                   <div className="col-9">
@@ -364,8 +359,6 @@ const InsertProduct = () => {
                     </div>
                   </div>
                 </div>
-
-
               </div>
               <div className="col-md-6">
                 <div className="form-group">
@@ -388,98 +381,19 @@ const InsertProduct = () => {
                 </div>
                 <div className="form-group">
                   <label className="font-weight-bold">Tag</label>
-                  <textarea className="form-control" name="tag" onChange={handleChange('tag')} value={tag}></textarea>
+                  <textarea className="form-control" name="tag" onChange={handleChange('tag')} value={tag} ></textarea>
                 </div>
-                <div className="form-group">
-                  <label className="font-weight-bold">Hình ảnh</label>
-                  <input type="file" onChange={uploadFile('photo')} className="form-control-file" multiple accept="image/x-png,image/gif,image/jpeg"/>
-                </div>
-
               </div>
             </div>
           </div>
           <div className="tab-pane" id="tab2" role="tabpanel" aria-labelledby="tab-2">
-
-            <div className="row">
-              <div className="col-md-4">
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" /><br />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-                <img className="m-1" src={`${PUBLIC_URL}/images/no-photo.jpg`} style={{maxHeight: '100px', maxWidth: '100px'}} alt="" />
-              </div>
-              <div className="col-md-4">
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 0</button>
-                  </span>
-                  <input id="Picture" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 1</button>
-                  </span>
-                  <input id="Picture1" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 2</button>
-                  </span>
-                  <input id="Picture2" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 3</button>
-                  </span>
-                  <input id="Picture3" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 4</button>
-                  </span>
-                  <input id="Picture4" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 5</button>
-                  </span>
-                  <input id="Picture5" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 6</button>
-                  </span>
-                  <input id="Picture6" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 7</button>
-                  </span>
-                  <input id="Picture7" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 8</button>
-                  </span>
-                  <input id="Picture8" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-                <div className="input-group" style={{marginBottom: '5px'}}>
-                  <span className="input-group-btn">
-                    <button className="btn btn-light" type="button" >Hình 9</button>
-                  </span>
-                  <input id="Picture9" type="text" className="form-control" placeholder="Đường dẫn hình ảnh" />
-                </div>
-              </div>
-              <div className="col-md-4">
-
-              </div>
-            </div>
-
+            <FileUpload
+              values={values}
+              setValues={setValues}
+              setLoading={setLoading}
+              formData={formData}
+              error={error}
+            />
           </div>
           <div className="tab-pane" id="tab3" role="tabpanel" aria-labelledby="tab-3">
             <CKEditor data={description} name="description" onChange={ evt => handleChangeCkeditor('description', evt) }
@@ -496,15 +410,19 @@ const InsertProduct = () => {
             />
           </div>
           <div className="tab-pane" id="tab5" role="tabpanel" aria-labelledby="tab-5">
-            <CKEditor data={context1} name="context1" onChange={ evt => handleChangeCkeditor('context1', evt) }
-              config={
-                configCkeditor()
-              }
-            />
+              {context1 ? <CKEditor data={context1} name="context1" onChange={ evt => handleChangeCkeditor('context1', evt) }
+                config={
+                  configCkeditor()
+                }
+              /> : <CKEditor data={context1} name="context1" onChange={ evt => handleChangeCkeditor('context1', evt) }
+                config={
+                  configCkeditor()
+                }
+              /> }
           </div>
         </div>
         <div className="text-center mt-3 mb-3">
-          <button className="btn btn-primary btn-inline-block"><i className="fa fa-save"></i> Lưu sản phẩm</button>
+          <button style={{pointerEvents: loading ? 'none' : 'visible'}} className="btn btn-primary btn-inline-block"><i className="fa fa-save"></i> Lưu sản phẩm</button>
         </div>
       </form>
     )
@@ -515,9 +433,7 @@ const InsertProduct = () => {
       {showSuccess()}
       <h3 className="h6 w-100 mb-3">THÊM SẢN PHẨM</h3>
       {formInput()}
-      <code>
-        {JSON.stringify(values)}
-      </code>
+      {JSON.stringify(categories)}
     </Layout>
   )
 }

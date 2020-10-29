@@ -8,6 +8,9 @@ import AdminRoute from './auth/AdminRoute'
 import ProductSearch from './views/products/ProductSearch'
 import UpdateProduct from './views/products/UpdateProduct'
 import InsertProduct from './views/products/InsertProduct'
+// Category
+import AddCategory from './views/categories/AddCategory'
+import CategorySearch from './views/categories/CategorySearch'
 const Routes = () => {
   return (
     <BrowserRouter>
@@ -18,6 +21,8 @@ const Routes = () => {
         <AdminRoute path="/admin/product/productsearch" exact component={ProductSearch}/>
         <AdminRoute path="/admin/product/update/:productId" exact component={UpdateProduct}/>
         <AdminRoute path="/admin/product/create" exact component={InsertProduct}/>
+        <AdminRoute path="/admin/category/create" exact component={AddCategory}/>
+        <AdminRoute path="/admin/category/categorysearch" exact component={CategorySearch}/>
       </Switch>
     </BrowserRouter>
   )

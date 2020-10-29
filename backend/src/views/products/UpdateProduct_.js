@@ -203,7 +203,6 @@ const UpdateProduct = ({match}) => {
     return (
         <Layout title="Update product" description={`Good day ${user.name}, ready to add a update product`} className="container">
             <div className="row">
-
                 <div className="col-md-10 offset-md-1">
                     <Link to="/admin/product/productsearch" className="mb-3 pb-3">
                       <button className="btn active">Back</button>
