@@ -1,9 +1,12 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import Menu from './Menu';
 import Topbar from './Topbar'
+const loading = () => <div></div>;
+const ImageList = React.lazy(()=> import('./ImageList'))
+
 const Layout = ({title = '', className, children}) => {
     return (
-        <div>
+        <Suspense fallback={loading()}>
             <Topbar />
             <div id="layoutSidenav">
               <Menu/>
@@ -11,7 +14,7 @@ const Layout = ({title = '', className, children}) => {
                 <div className={className}>{children}</div>
               </div>
             </div>
-        </div>
+        </Suspense>
     );
 };
 

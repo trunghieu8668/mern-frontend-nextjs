@@ -6,6 +6,10 @@ import {addItem, updateItem, removeItem} from './cartHelpers'
 import moment from 'moment'
 import NumberFormat from 'react-number-format';
 import { Row, Col } from 'react-bootstrap'
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
+
 const Card = ({product, showViewProductButton = true, isLayoutProductInfo = false, showAddToCartButton = true, viewLayout = "grid", cartUpdate = false,
   showRemoveProductButton = false,
   setRun = f => f, // default value of function
@@ -24,7 +28,7 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
     }
     const showAddToCart = (showAddToCartButton) => {
       return showAddToCartButton && (
-        <button onClick={addToCart} className="OrderProductButton ml-auto card-link btn btn-outline-warning">
+        <button onClick={addToCart} className="OrderProductButton ml-auto card-link btn btn-outline-success pl-4 pr-4">
             Mua ngay
         </button>
       )
@@ -81,10 +85,14 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
                   <ShowImage item={product} url="product"/>
                 </Col>
                 <Col xs={9}>
-                  <h2 className="h5 font-weight-bold">{product.name}</h2>
-                  <p className="card-text text-muted small mb-1">Nhóm: { product.category && product.category.name }</p>
+                  <h2 className="h5 font-weight-bold">
+                    <Link to={`/product/${product._id}`}>
+                      {product.productName}
+                    </Link>
+                  </h2>
+                  <p className="card-text text-muted small mb-1">Nhóm: { product.category && product.category.productGroupName }</p>
                   <p className="card-title text-muted small">Ngày tạo {moment(product.createdAt).fromNow()}</p>
-                  <p className="card-title font-weight-bold text-danger price"><NumberFormat value={product.price} displayType={'text'} thousandSeparator={true} prefix={''} suffix={' đ'}/></p>
+                  <p className="card-title font-weight-bold text-danger price"><NumberFormat value={product.productPriceNew} displayType={'text'} thousandSeparator={true} prefix={''} suffix={' đ'}/></p>
                   {shouldRedirect(redirect)}
                   <div className="d-flex">
                     { showViewButton(showViewProductButton) }
@@ -125,6 +133,18 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
         }
       }
       else {
+        const slickSettings = {
+          dots: false,
+          arrows: true,
+          lazyLoad: true,
+          autoplay: true,
+          infinite: true,
+          speed: 500,
+          slidesToShow: 1,
+          slidesToScroll: 1,
+          initialSlide: 2
+        };
+
         return (
           <div id="Product" className="Product clearfix">
             <div className="clearfix ProductInfo" itemScope itemType="http://schema.org/Product">
@@ -132,13 +152,20 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
                 <Col className="col-12 col-xs-12 col-sm-12 col-md-6">
                   <div className="clearfix productinfo-left-inner">
                     <Row className="row">
-
                       <Col className="col-12 col-xs-12">
-                        <figure id="Gallery" className="Pictures popup-gallery owl-carousel owl-theme">
-                          <a className="f-item" title href="/Image/Picture/lavie%20viva.png">
-                            <img src={product.pictures && product.pictures.length ? product.pictures[0].url : noPhoto} alt={product.productName} status={product.status2} />
-                          </a>
-                        </figure>
+                        <Slider {...slickSettings}>
+                          {
+                            product.pictures && product.pictures.length > 0 ? (
+                              product.pictures.map((image, i)=> (
+                                <div key={i} className="item">
+                                  <img src={image.url}/>
+                                </div>
+                              ))
+                            ) : noPhoto
+                          }
+
+                        </Slider>
+
                       </Col>
                     </Row>
                     <div className="d-none d-sm-none d-md-block">
@@ -157,7 +184,7 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
                       <div className="clearfix" itemProp="offers" itemScope itemType="http://schema.org/Offer">
                         <meta itemProp="priceCurrency" content="VND" />
                         <p className="ProductPriceNew clearfix">Giá: <span itemProp="price">
-                          {product.productPriceNew && product.productPriceNew > 0 ? <NumberFormat value={product.productPriceNew} displayType={'text'} thousandSeparator={true} prefix={''} suffix={' đ'}/> : <span class="contact-price">Liên hệ</span> }
+                          {product.productPriceNew && product.productPriceNew > 0 ? <NumberFormat value={product.productPriceNew} displayType={'text'} thousandSeparator={true} prefix={''} suffix={' đ'}/> : <span className="contact-price">Liên hệ</span> }
                         </span></p>
                       </div>
                     </div>
@@ -173,8 +200,11 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
                           </select>
                         </div>
                         <Col className="col-8 col-xs-8 text-center">
-                          <Row className="row">
-                            <Col className="col-8 col-xs-12 col-sm-6 col-md-auto OrderProductButton"><button className="btn btn-lg text-nowrap pl-4 pr-4"><i className="fa fa-cart-plus" /> Mua ngay</button></Col>
+                          <Row>
+                            <Col xs={8} md="auto" lg="auto" className="OrderProductButton text-nowrap">
+                              { showAddToCart(showAddToCartButton) }
+                              { shouldRedirect(redirect) }
+                            </Col>
                           </Row>
                         </Col>
                       </div>

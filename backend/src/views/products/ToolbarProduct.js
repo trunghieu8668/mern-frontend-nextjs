@@ -11,11 +11,11 @@ const ToolbarProduct = ({handleCategories}) => {
   const history = useHistory();
   const init = () => {
       getCategories().then(data => {
-          if(data.error) {
-              setError(data.error)
+          if(data.data.error) {
+            setError(data.error)
           }
           else{
-              setCategories(data)
+            setCategories(data.data)
           }
       })
 

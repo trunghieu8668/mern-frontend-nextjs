@@ -1,28 +1,33 @@
 const Category = require('../models/category')
+const slugify = require("slugify");
 const { errorHandler } = require('../helpers/dbErrorHandle');
 
 exports.categoryById = (req, res, next, id) => {
     Category.findById(id).exec((error, category) =>{
         if(error || !category) {
-            return res.status(400).json({
-                error: errorHandler(error)
-            })
+          return res.status(400).json({
+              error: errorHandler(error)
+          })
         }
         req.category = category;
         next();
     })
 }
 
-exports.create = (req, res) =>{
-    const category = new Category(req.body);
-    category.save((error, data) => {
-        if(error) {
-            return res.status(400).json({
-                error: errorHandler(error)
-            })
-        }
-        res.json({data});
+exports.create = async (req, res) => {
+  try {
+    console.log(req.body);
+    if( req.body.productGroupName ) {
+      req.body.slug = slugify(req.body.productGroupName)
+    }
+    const newCategory = await new Category(req.body).save();
+    res.json(newCategory)
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      error: errorHandler(error)
     })
+  }
 }
 
 exports.read = (req, res) =>{

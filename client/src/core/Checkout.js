@@ -41,9 +41,9 @@ const Checkout = ({ products, setRun = f => f, run = undefined }) => {
     <div onBlur={()=> setData({...data, error: ''})}>
       {
         data.clientToken !== null && products.length > 0 ? (
-          <div>
+          <div className="pb-4">
             <div className="form-group mb-3">
-              <label className="text-muted">Address</label>
+              <label className="text-muted">Địa chỉ</label>
               <textarea onChange={handleAddress} className="form-control" value={data.address}></textarea>
             </div>
             <DropIn options={{
@@ -52,7 +52,7 @@ const Checkout = ({ products, setRun = f => f, run = undefined }) => {
                   flow: "vault"
                 }
               }} onInstance={instance => (data.instance = instance)}/>
-            <button onClick={buy} className="btn btn-warning btn-lg active btn-block">Checkout</button>
+            <button onClick={buy} className="btn btn-warning btn-lg active btn-block">Thanh toán</button>
           </div>
         ) : null
       }

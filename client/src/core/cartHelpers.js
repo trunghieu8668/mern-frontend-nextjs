@@ -30,10 +30,13 @@ export const addItem = (item, next) => {
 export const itemTotal = () => {
   if(typeof window !== 'undefined') {
     if(localStorage.getItem('cart')) {
-      return JSON.parse(localStorage.getItem("cart")).length
+      const cartList = JSON.parse(localStorage.getItem("cart")) || [];
+      return cartList.reduce((currentValue, nextValue)=> {
+        return Number(currentValue + nextValue.count)
+      }, 0)
     }
   }
-  return 0
+
 }
 
 export const getCart = () => {

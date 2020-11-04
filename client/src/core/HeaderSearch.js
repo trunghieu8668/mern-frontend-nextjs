@@ -101,7 +101,6 @@ const HeaderSearch = () => {
               <div className="row search-auto">
                 {searchedProducts(results)}
               </div>
-              <a className="CloseSearchAjax close" href="javascript:void(0)" style={{display: 'none'}} title="Đóng"><span aria-hidden="true">×</span></a>
             </div>
           </div>
       </div>

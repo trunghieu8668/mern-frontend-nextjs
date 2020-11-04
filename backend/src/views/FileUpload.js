@@ -1,11 +1,17 @@
-import React from "react";
+import React, {useState, Suspense} from "react";
 import axios from "axios";
 import Resizer from "react-image-file-resizer";
 import { isAuthenticated } from '../models/auth/api'
 import {API} from '../config'
+import { Button } from 'react-bootstrap';
+// Lazy loading and code splitting -
+// Derieved idea from https://blog.logrocket.com/lazy-loading-components-in-react-16-6-6cea535c0b52
+const loading = () => <div></div>;
+const ImageList = React.lazy(()=> import('./ImageList'))
 
-const FileUpload = ({ values, setValues, setLoading, formData, error }) => {
+const FileUpload = ({ values, setValues, setLoading, error }) => {
   const {user, token} = isAuthenticated();
+  const [uploadLoading, setUploadLoading] = useState(false)
   const showError = () => (
     <div className="alert alert-danger" style={{display: error ? '' : 'none'}}>
       {error}
@@ -14,7 +20,8 @@ const FileUpload = ({ values, setValues, setLoading, formData, error }) => {
   const fileUploadAndResize = (e) => {
     let files = e.target.files; // 3
     let allUploadedFiles = values.pictures;
-    if (files) {
+    if (files && files.length > 0) {
+      setUploadLoading(true);
       setLoading(true);
       for (let i = 0; i < files.length; i++) {
         Resizer.imageFileResizer(
@@ -40,11 +47,13 @@ const FileUpload = ({ values, setValues, setLoading, formData, error }) => {
               .then((res) => {
                 console.log("IMAGE UPLOAD RES DATA", res.data);
                 setLoading(false);
+                setUploadLoading(false)
                 allUploadedFiles.push(res.data);
                 setValues({ ...values, pictures: allUploadedFiles });
               })
               .catch((err) => {
                 setLoading(false);
+                setUploadLoading(false)
                 console.log("CLOUDINARY UPLOAD ERR", err);
               });
           },
@@ -54,33 +63,59 @@ const FileUpload = ({ values, setValues, setLoading, formData, error }) => {
     }
   }
 
+  const handleImageRemove = (public_id) => {
+    const {user, token} = isAuthenticated();
+    setLoading(true);
+    // console.log("remove image", public_id);
+    axios
+      .post(
+        `${API}/removeimages/${user._id}`,
+        { public_id },
+        {
+          headers: {
+            Authorization: token ? `Bearer ${token}` : ""
+          },
+        }
+      )
+      .then((res) => {
+        setLoading(false);
+        const { pictures } = values;
+        let filteredImages = pictures.filter((item) => {
+          return item.public_id !== public_id;
+        });
+        setValues({ ...values, pictures: filteredImages });
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
+
+
   return (
     <>
-      {values.pictures && values.pictures.length ? (
-        <div className="form-group mt-4">
-          <div className="row row-cols-2 row-cols-sm-3 row-cols-md-5 row-cols-lg-6 d-flex align-items-stretch align-items-center">
-            {
-              values.pictures.map((image)=> (
-                 <div className="col" key={image.public_id}>
-                    <img className="img-fluid" height="100px" src={image.url}/>
-                  </div>
-              ))
-            }
-          </div>
+      <div className="d-flex mb-4">
+        <div className="col-auto h-auto bg-light align-self-center">
+          <label className={uploadLoading ? "btn btn-primary disabled" : "btn btn-primary"}>
+            {uploadLoading && <span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>}
+            Choose File
+            <input
+              type="file"
+              multiple
+              hidden
+              accept="image/x-png,image/gif,image/jpeg"
+              onChange={fileUploadAndResize}
+            />
+          </label>
         </div>
-      ) : ''}
-
-      <div className="row">
-        <label className="btn btn-primary">
-          Choose File
-          <input
-            type="file"
-            multiple
-            hidden
-            accept="image/x-png,image/gif,image/jpeg"
-            onChange={fileUploadAndResize}
-          />
-        </label>
+        <div className="flex-grow-1 pl-3">
+          {values.pictures && values.pictures.length > 0 && (
+            <Suspense fallback={loading()}>
+              <ImageList values={values.pictures} setValues={change => setValues({...values, pictures: change})} handleImageRemove={(value) => handleImageRemove(value)}/>
+            </Suspense>
+          )
+        }
+        </div>
       </div>
       {showError()}
     </>

@@ -48,15 +48,15 @@ const Menu = ({history}) => {
                   </Link>
                 </nav>
               </div>
-              <div className="sb-sidenav-menu-heading">Addons</div>
-              <a className="nav-link" href="charts.html">
+              <div className="sb-sidenav-menu-heading">Phím tắt</div>
+              <Link className="nav-link" style={isActive(history, '/admin/product/create')} to="/admin/product/create">
                 <div className="sb-nav-link-icon"><i className="fas fa-chart-area" /></div>
-                Charts
-              </a>
-              <a className="nav-link" href="tables.html">
+                  Tạo sản phẩm
+              </Link>
+              <Link className="nav-link" style={isActive(history, '/admin/category/create')} to="/admin/category/create">
                 <div className="sb-nav-link-icon"><i className="fas fa-table" /></div>
-                Tables
-              </a>
+                  Tạo Nhóm sản phẩm
+              </Link>
             </div>
           </div>
         </nav>

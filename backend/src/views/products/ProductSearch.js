@@ -5,7 +5,9 @@ import { Link } from 'react-router-dom'
 import { deleteProduct, totalProducts, getFilteredProducts } from '../../models/products/api'
 import NumberFormat from 'react-number-format'
 import ReactPaginate from 'react-paginate';
-import {PAGESIZE} from '../../config'
+import { PAGESIZE } from '../../config'
+import moment from 'moment'
+import { Edit, Trash2, Eye } from 'react-feather'
 // Lazy loading and code splitting -
 // Derieved idea from https://blog.logrocket.com/lazy-loading-components-in-react-16-6-6cea535c0b52
 const loading = () => <div></div>;
@@ -33,24 +35,22 @@ const ProductSearch = () => {
         console.log(data.error);
       }
       else {
-        setTotal(data)
+        setTotal(data.data)
       }
     })
   }
 
-  const loadFilteredResults = async (skip, myFilters) => {
-    //const newFilters = {...myFilters}
-    console.log(myFilters);
+  const loadFilteredResults = async (skip, limit, myFilters) => {
     getFilteredProducts(skip, limit, myFilters)
     .then(data => {
-      if(data.error) {
-        setError(data.error)
+      if(data.data.error) {
+        setError(data.data.error)
       }
       else {
-        setProducts(data.data)
-        setSize(data.size)
-        setTotal(data.totalCount)
-        setPageCount(Math.ceil(data.totalCount / limit))
+        setProducts(data.data.data)
+        setSize(data.data.size)
+        setTotal(data.data.totalCount)
+        setPageCount(Math.ceil(data.data.totalCount / limit))
       }
     })
   }
@@ -71,17 +71,17 @@ const ProductSearch = () => {
     let offset = Math.ceil(selected * limit);
     let toSkip = offset;
     setCurrentPage(selected)
-     getFilteredProducts(toSkip, limit, myFilters.filters)
-     .then(data => {
-         if(data.error) {
-             setError(data.error)
-         }
-         else {
-           setProducts(data.data)
-           setSize(data.size)
-           setTotal(data.totalCount)
-           setSkip(offset)
-         }
+    getFilteredProducts(toSkip, limit, myFilters.filters)
+    .then(data => {
+       if(data.data.error) {
+           setError(data.data.error)
+       }
+       else {
+         setProducts(data.data.data)
+         setSize(data.data.size)
+         setTotal(data.data.totalCount)
+         setSkip(offset)
+       }
      })
   };
 
@@ -90,7 +90,7 @@ const ProductSearch = () => {
     newFilters.filters[filterBy] = filters
     setSkip(0)
     setCurrentPage(0)
-    loadFilteredResults(0, newFilters.filters)
+    loadFilteredResults(skip, limit, newFilters.filters)
     setMyFilters(newFilters)
   }
 
@@ -115,31 +115,45 @@ const ProductSearch = () => {
           <thead>
             <tr>
               <th className="font-weight-bold" scope="col">#</th>
-              <th className="font-weight-bold" scope="col">Product Name</th>
-              <th className="font-weight-bold" scope="col">Price</th>
+              <th className="font-weight-bold" scope="col">Tên sản phẩm</th>
+              <th className="font-weight-bold" scope="col">Giá gốc</th>
+              <th className="font-weight-bold" scope="col">Giá đại lý</th>
+              <th className="font-weight-bold" scope="col">Giá web</th>
+              <th className="font-weight-bold" scope="col">Giá ảo</th>
               <th className="font-weight-bold" scope="col">Category</th>
+              <th className="font-weight-bold" scope="col">Trạng thái</th>
+              <th className="font-weight-bold" scope="col">Xem</th>
+              <th className="font-weight-bold" scope="col">Ngày tạo</th>
+              <th className="font-weight-bold" scope="col">Ngày cập nhật</th>
               <th className="font-weight-bold" scope="col">Action</th>
             </tr>
           </thead>
           <tbody>
               {
-                products.map((p, i)=> (
+                products && products.length && products.map((p, i)=> (
                   <tr key={i}>
-                    <th scope="row">{i +1}</th>
+                    <th scope="row">{i + 1}</th>
                     <td>
                       <Link to={`/admin/product/update/${p._id}`}>
                         {p.productName}
                       </Link>
                     </td>
-                    <td><NumberFormat value={p.price} displayType={'text'} thousandSeparator={true} prefix={''} suffix={''}/></td>
-                    <td>{p.category.name}</td>
-                    <td>
+                    <td><NumberFormat value={p.productPriceOld} displayType={'text'} thousandSeparator={true} prefix={''} suffix={''}/></td>
+                    <td><NumberFormat value={p.productPriceAgent} displayType={'text'} thousandSeparator={true} prefix={''} suffix={''}/></td>
+                    <td><NumberFormat value={p.productPriceNew} displayType={'text'} thousandSeparator={true} prefix={''} suffix={''}/></td>
+                    <td><NumberFormat value={p.productPriceVirtual} displayType={'text'} thousandSeparator={true} prefix={''} suffix={''}/></td>
+                    <td>{p.category && typeof p.category !== null ? p.category.productGroupName : ''}</td>
+                    <td>{p.status ? <span className="badge badge-success">Còn hàng</span> : <span className="badge badge-danger">Hết hàng</span> }</td>
+                    <td>{p.visit}</td>
+                    <td className="font-size-12">{moment(p.createdAt).format('DD/MM/YYYY | hh:mm:ss')}</td>
+                    <td className="font-size-12">{moment(p.updatedAt).format('DD/MM/YYYY | hh:mm:ss')}</td>
+                    <td className="text-nowrap">
                       <Link to={`/admin/product/update/${p._id}`}>
-                        <span className="badge badge-info badge-pill">Update</span>
+                        <span className="btn btn-outline-success p-1 circle-35 rounded-circle"><Edit size={15}/></span>
                       </Link>
-                      <span onClick={()=> detroy(p._id)} className="ml-2 badge badge-danger badge-pill">Delete</span>
+                      <span onClick={()=> detroy(p._id)} className="btn btn-outline-danger p-1 circle-35 rounded-circle ml-1 mr-1"><Trash2 size={15}/></span>
                       <Link to={`/product/${p._id}`} target="_blank">
-                        <span className="badge badge-link badge-pill">Link</span>
+                        <span className="btn btn-outline-primary p-1 circle-35 rounded-circle"><Eye size={15}/></span>
                       </Link>
                     </td>
                   </tr>

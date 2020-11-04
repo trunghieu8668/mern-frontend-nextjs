@@ -141,7 +141,7 @@ const UpdateProduct = ({match}) => {
   }
 
   const loadStatusValues = async () => {
-    getStatusValues(user._id, token).then(data => {
+    getStatusValues(user._id, token).then(data => {      
       if(data.error) {
         setValues({...values, error: data.error})
       }

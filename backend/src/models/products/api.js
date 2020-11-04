@@ -1,45 +1,42 @@
 import {API} from '../../config'
 import axios from "axios";
-export const createCategory = async (userId, token, category) => {
-    return await fetch(`${API}/category/create/${userId}`, {
-        method: "POST",
-        headers: {
-            Accept: 'application/json',
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(category)
-    })
-    .then(response => {
-        return response.json();
-    })
-    .catch(err => {console.log(err)})
-}
-
-export const createProduct = async (userId, token, product) => {
-    return await fetch(`${API}/product/create/${userId}`, {
-        method: "POST",
-        headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`
-        },
-        body: product
-    })
-    .then(response => {
-        return response.json();
-    })
-    .catch(err => {console.log(err)})
-}
-
+// export const createCategory = async (userId, token, category) => {
+//     return await fetch(`${API}/category/create/${userId}`, {
+//         method: "POST",
+//         headers: {
+//             Accept: 'application/json',
+//             "Content-Type": "application/json",
+//             Authorization: `Bearer ${token}`
+//         },
+//         body: JSON.stringify(category)
+//     })
+//     .then(response => {
+//         return response.json();
+//     })
+//     .catch(err => {console.log(err)})
+// }
+export const createCategory = async (userId, token, category) =>
+  await axios.post(`${API}/category/create/${userId}`, category, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`
+    }
+  }).catch(error => {
+    return error.response
+  });
+export const createProduct = async (userId, token, product) =>
+  await axios.post(`${
+    API}/product/create/${userId}`, product, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+  });
 
 export const getCategories = async () => {
-    return await fetch(`${API}/categories`, {
-        method: "GET"
-    })
-    .then(response => {
-        return response.json()
-    })
-    .catch(err => console.log(err))
+  return await axios.get(`${API}/categories`)
+  .catch(error => {
+    return error.response
+  });
 }
 
 export const listOrders = async (userId, token) => {
@@ -57,19 +54,17 @@ export const listOrders = async (userId, token) => {
 }
 
 export const getStatusValues = async (userId, token) => {
-    return await fetch(`${API}/product/status-values/${userId}`, {
-        method: "GET",
-        headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${token}`
-        }
+  return await axios.get(`${API}/product/status-values/${userId}`, {
+    headers: {
+      Accept: 'application/json',
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    }
     })
-    .then(response => {
-        return response.json()
-    })
-    .catch(err => console.log(err))
+  .catch(error => {
+    return error.response
+  });
 }
-
 export const updateOrderStatus = async (userId, token, orderId, status) => {
     return await fetch(`${API}/order/${orderId}/status/${userId}`, {
         method: "PUT",
@@ -93,25 +88,11 @@ export const updateOrderStatus = async (userId, token, orderId, status) => {
 * update product
 * delete product
 **/
-export const getProducts = async () => {
-    return await fetch(`${API}/products?limit=10`, {
-        method: "GET"
-    })
-    .then(response => {
-        return response.json()
-    })
-    .catch(err => console.log(err))
-}
+export const getProducts = async () =>
+  await axios.get(`${API}/products?limit=10`)
 
-export const totalProducts = async () => {
-  return await fetch(`${API}/products/count`, {
-    method: "GET"
-  })
-  .then(response => {
-    return response.json()
-  })
-  .catch(error => console.log(error))
-}
+export const totalProducts = async () =>
+  await axios.get(`${API}/products/count`)
 
 export const deleteProduct = async (productId, userId, token) => {
     return await fetch(`${API}/product/${productId}/${userId}`, {
@@ -129,71 +110,24 @@ export const deleteProduct = async (productId, userId, token) => {
 }
 export const getProduct = async (productId) =>
   await axios.get(`${API}/product/${productId}`);
-// export const getProduct = (productId) => {
-//     return fetch(`${API}/product/${productId}`, {
-//         method: "GET"
-//     })
-//     .then(response => {
-//         return response.json()
-//     })
-//     .catch(err => console.log(err))
-// }
-
-// export const updateProduct = async (productId, userId, token, product) => {
-//     return await fetch(`${API}/product/${productId}/${userId}`, {
-//         method: "PUT",
-//         headers: {
-//             Accept: 'application/json',
-//             Authorization: `Bearer ${token}`
-//         },
-//         body: product
-//     })
-//     .then(response => {
-//         return response.json()
-//     })
-//     .catch(err => console.log(err))
-// }
 
 export const updateProduct = async (productId, userId, token, product) =>
-  await axios.put(`${API}/product/${productId}/${userId}`, product, {
+  await axios.put(`${
+    API}/product/${productId}/${userId}`, product, {
     headers: {
       Authorization: `Bearer ${token}`
     },
   });
 export const getFilteredProducts = async (skip, limit, filters = {}) => {
-    const data = {
-        limit,
-        skip,
-        filters
-    }
-    return await fetch(`${API}/products/by/search`, {
-        method: "POST",
-        headers: {
-            Accept: 'application/json',
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-        return response.json();
-    })
-    .catch(err => {console.log(err)})
+  return await axios.post(`${API}/products/by/search`, {
+    limit,
+    skip,
+    filters
+  })
 }
 
 export const getTotalProductsBySearch = async (filters = {}) => {
-    const data = {
-      filters
-    }
-    return await fetch(`${API}/products/count/search`, {
-        method: "POST",
-        headers: {
-            Accept: 'application/json',
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-    })
-    .then(response => {
-      return response.json();
-    })
-    .catch(err => {console.log(err)})
+  return await axios.post(`${API}/products/count/search`, {
+    filters
+  })
 }

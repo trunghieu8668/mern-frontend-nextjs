@@ -81,22 +81,76 @@ exports.remove = (req, res) => {
 //     })
 // }
 
-exports.create = async (req, res) => {
-  try {
-    //console.log(req.body);
-    if (req.body.productName) {
-      req.body.slug = slugify(req.body.productName);
+exports.create = async (req, res, next) => {
+  // if (!req.files || _.isEmpty(req.files)) {
+  //       return res.status(400)
+  //           .json("error", "No file uploaded")
+  //   }
+
+  //console.log("req.body", req);
+    const pictures = req.files;
+    try {
+      const { productName, productName2, productSerial, description, context, context1, context2, context3, context4, productPriceNew, productPriceVirtual, productPriceOld, productPriceAgent, slug, category, brand, productIds, productIds2, quantity, photo, sold, visit, topLevel, status, status2, vat, shipping, metaTitle, metaDescription, metaKeyword } = req.body;
+      // if( !category ) {
+      //   return res.status(400).json({
+      //       error: "Chọn nhóm sản phẩm"
+      //   })
+      // }
+      // if( !productName ) {
+      //   return res.status(400).json({
+      //     error: "Nhập tên sản phẩm"
+      //   })
+      // }
+      // if( !productSerial ) {
+      //   return res.status(400).json({
+      //     error: "Nhập số serial sản phẩm"
+      //   })
+      // }
+
+      let product = new Product({
+        productName, productName2, productSerial, description, context, context1, context2, context3, context4, productPriceNew, productPriceVirtual, productPriceOld, productPriceAgent, slug, category, brand, productIds, productIds2, quantity, photo, pictures, sold, visit, topLevel, status, status2, vat, shipping, metaTitle, metaDescription, metaKeyword
+      })
+      //console.log(files);
+      let urls = [];
+      let multiple = async (path) => await upload(path);
+      for (const file of pictures) {
+        const {path} = file;
+        console.log("path", file);
+        const newPath = await multiple(path);
+        urls.push(newPath);
+        fs.unlinkSync(path);
+      }
+      //console.log('urls', urls);
+      if (urls) {
+        let productw = _.extend(product, {pictures: urls});
+        let new_product = new Product(productw)
+        await new_product.save((err, result)=>{
+          if(err) {
+            return res.status(400).json({
+              error: errorHandler(err)
+            })
+          }
+          //result.photo = undefined;
+          res.json(result);
+        })
+      }
+      if (!urls) {
+        product.save((err, result)=>{
+          if(err) {
+              return res.status(400).json({
+                  error: errorHandler(err)
+              })
+          }
+          //result.pictures = undefined;
+          res.json(result);
+        })
+      }
+    } catch (e) {
+        console.log("err :", e);
+        return next(e);
     }
-    const newProduct = await new Product(req.body).save();
-    res.json(newProduct);
-  } catch (err) {
-    console.log(err);
-    // res.status(400).send("Create product failed");
-    res.status(400).json({
-      err: err.message,
-    });
-  }
-};
+}
+
 exports.update = (req, res) => {
     let form = new formidable.IncomingForm()
     form.keepExtensions = true;

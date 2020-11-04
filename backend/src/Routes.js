@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
+import './gui.css'
 // Auth
 import Login from './views/auth/Login'
 import Dashboard from './views/Dashboard'

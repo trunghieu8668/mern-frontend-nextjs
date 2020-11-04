@@ -1,39 +1,36 @@
-import React, { Suspense, useState, useEffect } from 'react'
-import {Redirect, useHistory} from 'react-router-dom'
+import React, { Suspense, useState, useEffect, useRef } from 'react'
+import {Redirect} from 'react-router-dom'
 import Layout from '../Layout'
-import FileUpload from '../FileUpload'
 import { isAuthenticated } from '../../models/auth/api'
-import { Link } from 'react-router-dom'
-import { getProduct, updateProduct, getCategories, getStatusValues } from '../../models/products/api'
+import { Link, useHistory } from 'react-router-dom'
+import { createProduct, getCategories, getStatusValues } from '../../models/products/api'
 import NumberFormat from 'react-number-format'
 import {PUBLIC_URL} from '../../config'
-import LazyLoad from 'react-lazyload'
-// Lazy loading and code splitting -
-// Derieved idea from https://blog.logrocket.com/lazy-loading-components-in-react-16-6-6cea535c0b52
-const loader = () => <div></div>;
-const Ckeditor = React.lazy(()=> import('../editor/Ckeditor'))
+import Ckeditor from '../editor/Ckeditor'
+import FileUpload from '../FileUpload'
 
-const initialState = {
-  productName: '',
-  productName2: '',
-  productSerial: '',
-  productPriceNew: 0,
-  productPriceVirtual: 0,
-  productPriceOld: 0,
-  productPriceAgent: 0,
-  slug: '',
-  photo: '',
-  category: '',
-  quantity: 0,
-  warranty: 0,
-  sold: 0,
-  visit: 0,
-  topLevel: 1
-}
-const UpdateProduct = ({match}) => {
-  const [values, setValues] = useState(initialState);
-  const [error, setError] = useState('');
-  const [categories, setCategories] = useState([])
+const InsertProduct = () => {
+  const [values, setValues] = useState({
+    productName: '',
+    productName2: '',
+    productSerial: '',
+    productPriceNew: 0,
+    productPriceVirtual: 0,
+    productPriceOld: 0,
+    productPriceAgent: 0,
+    slug: '',
+    photo: '',
+    category: '',
+    quantity: 0,
+    warranty: 0,
+    sold: 0,
+    visit: 0,
+    topLevel: 1,
+    error: '',
+    createdProduct: '',
+    redirectToProductsList: false,
+    formdata: ''
+  })
   const history = useHistory()
   const {
     productName,
@@ -53,6 +50,7 @@ const UpdateProduct = ({match}) => {
     slug,
     pictures,
     category,
+    categories,
     brand,
     productIds,
     productIds2,
@@ -62,57 +60,64 @@ const UpdateProduct = ({match}) => {
     tag,
     visit,
     vat,
+    alt,
     topLevel,
+    error,
     status,
     status2,
+    createdProduct,
+    redirectToProductsList,
+    formData
   } = values
-
   const [loading, setLoading] = useState(false);
   const [statusValues, setStatusValues] = useState([])
   const {user, token} = isAuthenticated()
-
-  // process useEffect
-  const init = async (productId) => {
-    setLoading(true);
-    getProduct(productId).then((data) => {
-      setValues({...values, ...data.data});
-      setLoading(false);
-    }).catch(err => { setError(err); setLoading(false); })
+  const init = () => {
+    getCategories().then(data => {
+      if(data.data.error) {
+        setValues({...values, error: data.data.error})
+      }
+      else {
+        setValues({...values, categories: data.data, formData: new FormData()})
+      }
+    })
   }
-  const initCategories = async () => {
-    getCategories()
-    .then((data) => setCategories(data.data))
-    .catch(err => { setError(err) })
-  }
-
   useEffect(()=> {
-    setTimeout(() => {
-      init(match.params.productId)
-    }, 1000);
-    initCategories();
+    init()
     loadStatusValues()
   }, [])
 
-  const handleChange = name => e => {
-    setValues({ ...values, [e.target.name]: e.target.value });
+  const handleChange = name => event => {
+    const value = name === 'photo' ? event.target.files[0] : event.target.value;
+    formData.set(name, value);
+    setValues({...values, error: false, createdProduct: '', [name]: value})
   }
-
   const handleChangeChecked = name => event => {
+    console.log(event.target.checked);
     const value = event.target.checked;
-    setValues({...values, createdProduct: '', [name]: value})
+    formData.set(name, value);
+    setValues({...values, error: false, createdProduct: '', [name]: value})
   }
-
   const handleChangeCkeditor = (name, evt) => {
+    formData.set(name, evt.editor.getData());
     setValues({...values, [name]: evt.editor.getData()});
   }
+  const uploadFile = name => event => {
+    const files = event.target.files;
+    for (let i = 0; i < files.length; i++) {
+       formData.append(`photo`, files[i])
+    }
+  }
 
-  const loadStatusValues = async () => {
-    getStatusValues(user._id, token).then((data) => {
-      if(data.data.error) {
-        setError(data.data.error)
+  const loadStatusValues = () => {
+    getStatusValues(user._id, token).then(data => {
+      if(data.error) {
+        setValues({...values, error: data.error})
       }
-      else setStatusValues(data.data);
-    });
+      else {
+        setStatusValues(data.data)
+      }
+    })
   }
 
   const showStatus = o => (
@@ -125,7 +130,82 @@ const UpdateProduct = ({match}) => {
       </select>
     </div>
   )
+  const showError = () => (
+    <div className="alert alert-danger" style={{display: error ? '' : 'none'}}>
+      {error}
+    </div>
+  )
 
+  const clickSubmit = (event) => {
+    event.preventDefault();
+    setValues({...values, error: '', loading: true})
+    // createProduct(user._id, token, formData).then(data => {
+    //   if(data.error) {
+    //     setValues({...values, error: data.error})
+    //   }
+    //   else {
+    //     setValues({...values,
+    //       createdProduct: true,
+    //       redirectToProductsList: true
+    //     })
+    //   }
+    // }).catch(error => console.log(error))
+    // console.log(formData.values());
+    // inputEl.current.value;
+    // console.log(inputEl.target.val());
+
+
+    const fields = Array.prototype.slice.call(event.target)
+      .filter(el => el.name )
+      .reduce((form, el) => ({
+        ...values,
+        [el.name]: el.name === 'photo' ? el.files[0] : el.value, formData: formData.set(el.name, (el.name === 'photo' ? el.files[0] : el.value))
+      }), {})
+    createProduct(user._id, token, formData).then(data => {
+      if(data.error) {
+        setValues({...values, error: data.error})
+      }
+      else {
+        formData.delete('photo')
+        setValues({...values,
+          productName: '',
+          productName2: '',
+          productSerial: '',
+          description: '',
+          context: '',
+          context1: '',
+          context2: '',
+          context3: '',
+          context4: '',
+          context5: '',
+          productPriceNew: 0,
+          productPriceVirtual: 0,
+          productPriceOld: 0,
+          productPriceAgent: 0,
+          slug: '',
+          photo: '',
+          pictures: '',
+          brand: [],
+          productIds: [],
+          productIds2: [],
+          quantity: 0,
+          warranty: 12,
+          sold: 0,
+          tag: '',
+          visit: 0,
+          vat: true,
+          topLevel: 1,
+          error: '',
+          createdProduct: '',
+          redirectToProductsList: false,
+          formdata: '',
+          loading: false,
+          createdProduct: true,
+          redirectToProductsList: true,
+        })
+      }
+    }).catch(error => console.log(error))
+  }
   const showCategory = () => (
     <>
       <label className="font-weight-bold">Nhóm sản phẩm</label>
@@ -139,27 +219,16 @@ const UpdateProduct = ({match}) => {
       </select>
     </>
   )
-  const showError = () => (
-    <div className="alert alert-danger" style={{display: error ? '' : 'none'}}>
-      {error}
-    </div>
-  )
 
-  const clickSubmit = (event) => {
-    event.preventDefault();
-    setError('');
-    setLoading(true);
-    updateProduct(match.params.productId, user._id, token, values)
-    .then((data)=> {
-      if(data.error) {
-        setError(data.error);
-        setLoading(false);
-      }
-      else {
-        history.push('/admin/product/productsearch')
-      }
-    }).catch(error => console.log(error))
+  const shouldRedirect = redirectToProductsList => {
+    if(redirectToProductsList) return <Redirect to="/admin/product/productsearch"/>
   }
+
+  const showSuccess = () => (
+      <div className="alert alert-info" style={{display: createdProduct ? '' : 'none'}}>
+          {`${createdProduct}`} is created
+      </div>
+  )
 
   const formInput = () => {
     return (
@@ -212,25 +281,26 @@ const UpdateProduct = ({match}) => {
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá gốc</label>
-                      <NumberFormat value={productPriceOld} onValueChange={e => {setValues({...values, productPriceOld: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
+                      <NumberFormat value={productPriceOld} onValueChange={e => {formData.set('productPriceOld', e.floatValue); setValues({...values, productPriceOld: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
+
                   </div>
                   </div>
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá đại lý</label>
-                      <NumberFormat value={productPriceAgent} onValueChange={e => { setValues({...values, productPriceAgent: e.floatValue})}} className="form-control" thousandSeparator={true} isNumericString={true}/>
+                      <NumberFormat value={productPriceAgent} onValueChange={e => {formData.set('productPriceAgent', e.floatValue); setValues({...values, productPriceAgent: e.floatValue})}} className="form-control" thousandSeparator={true} isNumericString={true}/>
                   </div>
                   </div>
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá web</label>
-                      <NumberFormat value={productPriceNew} onValueChange={e => {setValues({...values, productPriceNew: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
+                      <NumberFormat value={productPriceNew} onValueChange={e => {formData.set('productPriceNew', e.floatValue); setValues({...values, productPriceNew: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
                     </div>
                   </div>
                   <div className="col-md-3">
                     <div className="form-group">
                       <label className="font-weight-bold w-100">Giá ảo</label>
-                      <NumberFormat value={productPriceVirtual} onValueChange={e => {setValues({...values, productPriceVirtual: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
+                      <NumberFormat value={productPriceVirtual} onValueChange={e => {formData.set('productPriceVirtual', e.floatValue); setValues({...values, productPriceVirtual: e.floatValue})}} className="form-control" thousandSeparator={true} prefix={''} suffix={''}/>
                     </div>
                   </div>
                 </div>
@@ -316,48 +386,34 @@ const UpdateProduct = ({match}) => {
               values={values}
               setValues={setValues}
               setLoading={setLoading}
+              formData={formData}
               error={error}
             />
           </div>
           <div className="tab-pane" id="tab3" role="tabpanel" aria-labelledby="tab-3">
-            <Suspense fallback={loader()}>
-              <Ckeditor name={description} values={values.description} setValues={(data) => setValues({...values, description: data})}/>
-            </Suspense>
+
           </div>
           <div className="tab-pane" id="tab4" role="tabpanel" aria-labelledby="tab-4">
-            <Suspense fallback={loader()}>
-              <Ckeditor name={context} values={values.context} setValues={(data) => setValues({...values, context: data})}/>
-            </Suspense>
+
           </div>
           <div className="tab-pane" id="tab5" role="tabpanel" aria-labelledby="tab-5">
-            <Suspense fallback={loader()}>
-              <Ckeditor name={context1} values={values.context1} setValues={(data) => setValues({...values, context1: data})}/>
-            </Suspense>
+              
           </div>
         </div>
         <div className="text-center mt-3 mb-3">
-          <button className={loading ? "btn btn-primary btn-inline-block disabled" : "btn btn-primary btn-inline-block"}><i className="fa fa-save"></i> Lưu sản phẩm</button>
+          <button style={{pointerEvents: loading ? 'none' : 'visible'}} className="btn btn-primary btn-inline-block"><i className="fa fa-save"></i> Lưu sản phẩm</button>
         </div>
       </form>
     )
   }
   return (
     <Layout title="Product Insert" className="container pl-0 pr-0 pt-3 pb-2">
-      <div className="d-block mb-2">
-        <div className="btn-group">
-          <Link to="/admin/product/create">
-            <button type="button" className="btn btn-light border" ><i className="fa fa-plus-square text-primary" /></button>
-          </Link>
-          <button type="button" className="btn btn-light border" ><i className="fa fa-minus-square text-danger" /></button>
-          <Link onClick={()=> history.push("/admin/product/productsearch")}>
-            <button type="button" className="btn btn-light border" ><i className="fa fa-search text-success" /></button>
-          </Link>
-        </div>
-      </div>
       {showError()}
+      {showSuccess()}
+      <h3 className="h6 w-100 mb-3">THÊM SẢN PHẨM</h3>
       {formInput()}
     </Layout>
   )
 }
 
-export default UpdateProduct
+export default InsertProduct

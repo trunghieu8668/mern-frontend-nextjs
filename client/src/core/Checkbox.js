@@ -20,12 +20,12 @@ const Checkbox = ({categories, handleFilters}) => {
         handleFilters(newCheckedCategoryId)
     }
     // Step 1
-    return categories.map((e, i) => (        
+    return categories.map((e, i) => (
         <div className="custom-control custom-checkbox checkbox-item mb-1 mt-1" key={i}>
             {/* // Step 3 onChange */}
             {/* // Step 5 value */}
             <input value={checked.indexOf(e._id === -1 )} onChange={handleToggle(e._id)} id={`customCheck${i}`} type="checkbox" className="custom-control-input"/>
-            <label className="custom-control-label" htmlFor={`customCheck${i}`}>{e.name}</label>
+            <label className="custom-control-label" htmlFor={`customCheck${i}`}>{e.productGroupName}</label>
         </div>
     ))
 };
