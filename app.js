@@ -54,13 +54,13 @@ app.use(function (err, req, res, next) {
 //
 const port = process.env.PORT || 8000
 
-// if(process.env.NODE_ENV == 'production'){
-//   app.use(express.static('client_nextjs/build'))
-//   const path = require('path')
-//   app.get("*", (req, res) => {
-//     res.sendFile(path.resolve(__dirname, 'client_nextjs', 'build', 'index.html'))
-//   })
-// }
+if(process.env.NODE_ENV == 'production'){
+  app.use(express.static('client_nextjs/build'))
+  const path = require('path')
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client_nextjs', 'build'))
+  })
+}
 //Run
 app.listen(port, () =>{
     console.log('Server is start on Port: ' + port)
