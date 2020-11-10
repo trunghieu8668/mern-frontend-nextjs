@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors')
 const expressValidator = require('express-validator');
 const { readdirSync } = require("fs");
+require('dotenv').config();
 // App
 const app = express();
 // import router

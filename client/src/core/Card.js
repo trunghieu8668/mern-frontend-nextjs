@@ -6,9 +6,8 @@ import {addItem, updateItem, removeItem} from './cartHelpers'
 import moment from 'moment'
 import NumberFormat from 'react-number-format';
 import { Row, Col } from 'react-bootstrap'
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import Carousel from "react-multi-carousel";
+import "react-multi-carousel/lib/styles.css";
 
 const Card = ({product, showViewProductButton = true, isLayoutProductInfo = false, showAddToCartButton = true, viewLayout = "grid", cartUpdate = false,
   showRemoveProductButton = false,
@@ -133,16 +132,24 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
         }
       }
       else {
-        const slickSettings = {
-          dots: false,
-          arrows: true,
-          lazyLoad: true,
-          autoplay: true,
-          infinite: true,
-          speed: 500,
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          initialSlide: 2
+        const responsive = {
+          superLargeDesktop: {
+            // the naming can be any, depends on you.
+            breakpoint: { max: 4000, min: 3000 },
+            items: 1
+          },
+          desktop: {
+            breakpoint: { max: 3000, min: 1024 },
+            items: 1
+          },
+          tablet: {
+            breakpoint: { max: 1024, min: 464 },
+            items: 1
+          },
+          mobile: {
+            breakpoint: { max: 464, min: 0 },
+            items: 1
+          }
         };
 
         return (
@@ -153,7 +160,7 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
                   <div className="clearfix productinfo-left-inner">
                     <Row className="row">
                       <Col className="col-12 col-xs-12">
-                        <Slider {...slickSettings}>
+                        <Carousel responsive={responsive}>
                           {
                             product.pictures && product.pictures.length > 0 ? (
                               product.pictures.map((image, i)=> (
@@ -164,7 +171,7 @@ const Card = ({product, showViewProductButton = true, isLayoutProductInfo = fals
                             ) : noPhoto
                           }
 
-                        </Slider>
+                        </Carousel>
 
                       </Col>
                     </Row>
