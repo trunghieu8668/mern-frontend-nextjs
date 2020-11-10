@@ -1,0 +1,17 @@
+body {font-size: 13px !important;font-family:Arial, Tahoma,sans-serif}
+.table th, .table td {padding-top: 8px !important;padding-bottom: 8px !important}
+a, a:active, a:focus, input, input:active, input:focus, button, button:active, button:focus, select, select:active, select:focus, .bootstrap-select .btn, .bootstrap-select .btn:active, .bootstrap-select .btn:focus { outline: 0 !important; box-shadow: none !important}
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+-webkit-appearance:none;
+margin:0
+}
+input, .form-control {font-size: 13px !important}
+.page-item .page-link{background: #EFF2F7}
+.page-item:hover:not(.disabled) .page-link, .page-item:hover:not(.active) .page-link {background: var(--info);color:#fff}
+.form-group {margin-bottom: 5px !important}
+.custom-select {font-size: 14px !important}
+.custom-control-label {padding-top: 0.25rem !important}
+#TabContent {min-height: calc(100vh - 235px)}
+.disabled {pointer-events: none;opacity: 0.5}
+.font-size-12 {font-size: 12px}
+.circle-35 {height: 32px;width:32px}
