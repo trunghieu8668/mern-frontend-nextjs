@@ -66,54 +66,54 @@ if(process.env.NODE_ENV == 'production'){
 //   const nextApp = next({ dir: '.', dev });
 //   const nextHandler = nextApp.getRequestHandler();
 
-//   nextApp.prepare()
-//   .then(() => {
-//     const server = express();
+  nextApp.prepare()
+  .then(() => {
+    const server = express();
 
-//     if (!dev) {
-//       // Enforce SSL & HSTS in production
-//       server.use(function(req, res, next) {
-//         var proto = req.headers["x-forwarded-proto"];
-//         if (proto === "https") {
-//           res.set({
-//             'Strict-Transport-Security': 'max-age=31557600' // one-year
-//           });
-//           return next();
-//         }
-//         res.redirect("https://" + req.headers.host + req.url);
-//       });
-//     }
+    if (!dev) {
+      // Enforce SSL & HSTS in production
+      server.use(function(req, res, next) {
+        var proto = req.headers["x-forwarded-proto"];
+        if (proto === "https") {
+          res.set({
+            'Strict-Transport-Security': 'max-age=31557600' // one-year
+          });
+          return next();
+        }
+        res.redirect("https://" + req.headers.host + req.url);
+      });
+    }
 
-//     // Static files
-//     // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
-//     server.use('/static', express.static(path.join(__dirname, 'static'), {
-//       maxAge: dev ? '0' : '365d'
-//     }));
+    // Static files
+    // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
+    server.use('/static', express.static(path.join(__dirname, 'static'), {
+      maxAge: dev ? '0' : '365d'
+    }));
 
-//     // Example server-side routing
-//     server.get('/a', (req, res) => {
-//       return nextApp.render(req, res, '/b', req.query)
-//     })
+    // Example server-side routing
+    server.get('/a', (req, res) => {
+      return nextApp.render(req, res, '/b', req.query)
+    })
 
-//     // Example server-side routing
-//     server.get('/b', (req, res) => {
-//       return nextApp.render(req, res, '/a', req.query)
-//     })
+    // Example server-side routing
+    server.get('/b', (req, res) => {
+      return nextApp.render(req, res, '/a', req.query)
+    })
 
-//     // Default catch-all renders Next app
-//     server.get('*', (req, res) => {
-//       // res.set({
-//       //   'Cache-Control': 'public, max-age=3600'
-//       // });
-//       const parsedUrl = url.parse(req.url, true);
-//       nextHandler(req, res, parsedUrl);
-//     });
+    // Default catch-all renders Next app
+    server.get('*', (req, res) => {
+      // res.set({
+      //   'Cache-Control': 'public, max-age=3600'
+      // });
+      const parsedUrl = url.parse(req.url, true);
+      nextHandler(req, res, parsedUrl);
+    });
 
-//     server.listen(port, (err) => {
-//       if (err) throw err;
-//       console.log(`Listening on http://localhost:${port}`);
-//     });
-//   });
+    server.listen(port, (err) => {
+      if (err) throw err;
+      console.log(`Listening on http://localhost:${port}`);
+    });
+  });
 }
 
 //Run
