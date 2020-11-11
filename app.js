@@ -1,7 +1,4 @@
-const express = require ('express');
-const next = require('next');
-const path = require('path');
-const url = require('url');
+const express = require ('express')
 const mongoose = require('mongoose');
 require('dotenv').config();
 const morgan = require('morgan');
@@ -10,7 +7,6 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors')
 const expressValidator = require('express-validator');
 const { readdirSync } = require("fs");
-require('dotenv').config();
 // App
 const app = express();
 // import router
@@ -58,65 +54,12 @@ app.use(function (err, req, res, next) {
 const port = process.env.PORT || 8000
 
 if(process.env.NODE_ENV == 'production'){
-  app.use(express.static('client_nextjs/build'))
+  app.use(express.static('client_nextjs/public'))
   const path = require('path')
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client_nextjs', 'build'))
+    res.sendFile(path.resolve(__dirname, 'client_nextjs', 'build', 'index.html'))
   })
-  
-//   const nextApp = next({ dir: '.', dev });
-//   const nextHandler = nextApp.getRequestHandler();
-
-//   nextApp.prepare()
-//   .then(() => {
-//     const server = express();
-
-//     if (!dev) {
-//       // Enforce SSL & HSTS in production
-//       server.use(function(req, res, next) {
-//         var proto = req.headers["x-forwarded-proto"];
-//         if (proto === "https") {
-//           res.set({
-//             'Strict-Transport-Security': 'max-age=31557600' // one-year
-//           });
-//           return next();
-//         }
-//         res.redirect("https://" + req.headers.host + req.url);
-//       });
-//     }
-
-//     // Static files
-//     // https://github.com/zeit/next.js/tree/4.2.3#user-content-static-file-serving-eg-images
-//     server.use('/static', express.static(path.join(__dirname, 'static'), {
-//       maxAge: dev ? '0' : '365d'
-//     }));
-
-//     // Example server-side routing
-//     server.get('/a', (req, res) => {
-//       return nextApp.render(req, res, '/b', req.query)
-//     })
-
-//     // Example server-side routing
-//     server.get('/b', (req, res) => {
-//       return nextApp.render(req, res, '/a', req.query)
-//     })
-
-//     // Default catch-all renders Next app
-//     server.get('*', (req, res) => {
-//       // res.set({
-//       //   'Cache-Control': 'public, max-age=3600'
-//       // });
-//       const parsedUrl = url.parse(req.url, true);
-//       nextHandler(req, res, parsedUrl);
-//     });
-
-//     server.listen(port, (err) => {
-//       if (err) throw err;
-//       console.log(`Listening on http://localhost:${port}`);
-//     });
-//   });
 }
-
 //Run
 app.listen(port, () =>{
     console.log('Server is start on Port: ' + port)
